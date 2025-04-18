@@ -1,0 +1,1781 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campeonato de Handebol - Sistema de Gerenciamento</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.0.0/css/all.min.css">
+    <style>
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .view-content {
+            display: none;
+        }
+        .view-content.active {
+            display: block;
+        }
+        .table-fixture {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .table-fixture th, .table-fixture td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        .table-fixture th {
+            background-color: #f0f4ff;
+        }
+        .score-input {
+            width: 40px;
+            text-align: center;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .observation-input {
+            width: 100%;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 4px;
+        }
+        .team-logo {
+            width: 30px;
+            height: 30px;
+            background-color: #e5e7eb;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+    <header class="bg-blue-900 text-white p-4 shadow-md">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold">Campeonato de Handebol</h1>
+            <div class="space-x-4">
+                <button id="adminViewBtn" class="bg-blue-700 hover:bg-blue-600 px-4 py-2 rounded-md font-medium active">Área Administrativa</button>
+                <button id="publicViewBtn" class="bg-green-700 hover:bg-green-600 px-4 py-2 rounded-md font-medium">Área Pública</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Área Administrativa -->
+    <div id="adminView" class="view-content active container mx-auto p-6">
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-2xl font-bold text-blue-900 mb-4">Painel do Administrador</h2>
+            <p class="mb-4 text-gray-700">Bem-vindo à área administrativa do sistema de gerenciamento do campeonato de handebol. Aqui você pode gerenciar os resultados e baixar as planilhas Excel.</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                    <h3 class="font-bold text-lg text-blue-800 mb-2">Planilha: Todos Contra Todos</h3>
+                    <p class="text-sm text-gray-600 mb-3">Formato com 5 equipes, todos jogam contra todos.</p>
+                    <a href="#" class="bg-blue-600 text-white px-4 py-2 rounded inline-block hover:bg-blue-700 w-full text-center">
+                        <i class="fas fa-download mr-2"></i>Download Excel
+                    </a>
+                </div>
+                
+                <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                    <h3 class="font-bold text-lg text-blue-800 mb-2">Planilha: Chaves A e B (Configuração 1)</h3>
+                    <p class="text-sm text-gray-600 mb-3">Formato com duas chaves de 3 equipes cada.</p>
+                    <a href="#" class="bg-blue-600 text-white px-4 py-2 rounded inline-block hover:bg-blue-700 w-full text-center">
+                        <i class="fas fa-download mr-2"></i>Download Excel
+                    </a>
+                </div>
+                
+                <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                    <h3 class="font-bold text-lg text-blue-800 mb-2">Planilha: Chaves A e B (Configuração 2)</h3>
+                    <p class="text-sm text-gray-600 mb-3">Formato com duas chaves de 3 equipes cada.</p>
+                    <a href="#" class="bg-blue-600 text-white px-4 py-2 rounded inline-block hover:bg-blue-700 w-full text-center">
+                        <i class="fas fa-download mr-2"></i>Download Excel
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Abas para edição de resultados -->
+            <div class="border rounded-lg overflow-hidden mt-8">
+                <div class="bg-gray-100 flex border-b">
+                    <button class="tab-button py-2 px-4 font-medium focus:outline-none bg-white border-r" data-tab="tab1">Todos Contra Todos</button>
+                    <button class="tab-button py-2 px-4 font-medium focus:outline-none bg-gray-100 border-r" data-tab="tab2">Chaves A e B (1)</button>
+                    <button class="tab-button py-2 px-4 font-medium focus:outline-none bg-gray-100" data-tab="tab3">Chaves A e B (2)</button>
+                </div>
+                
+                <!-- Conteúdo da aba Todos Contra Todos -->
+                <div id="tab1" class="tab-content active p-4">
+                    <h3 class="text-xl font-bold mb-4 text-blue-900">Formato: Todos Contra Todos</h3>
+                    
+                    <div class="mb-6">
+                        <h4 class="font-bold text-lg mb-2">Jogos</h4>
+                        <div class="overflow-x-auto">
+                            <table class="table-fixture">
+                                <thead>
+                                    <tr>
+                                        <th>Jogo</th>
+                                        <th>Equipe Casa</th>
+                                        <th>Placar</th>
+                                        <th>Equipe Visitante</th>
+                                        <th>Observações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>1</td>
+                                        <td>NATAL-RN</td>
+                                        <td>
+                                            <input type="number" class="score-input" min="0"> x 
+                                            <input type="number" class="score-input" min="0">
+                                        </td>
+                                        <td>EDUARDO COELHO-PE</td>
+                                        <td><input type="text" class="observation-input"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>2</td>
+                                        <td>HCK-CE</td>
+                                        <td>
+                                            <input type="number" class="score-input" min="0"> x 
+                                            <input type="number" class="score-input" min="0">
+                                        </td>
+                                        <td>MIRAIMA-CE</td>
+                                        <td><input type="text" class="observation-input"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>3</td>
+                                        <td>SALGUEIRO-PE</td>
+                                        <td>
+                                            <input type="number" class="score-input" min="0"> x 
+                                            <input type="number" class="score-input" min="0">
+                                        </td>
+                                        <td>NATAL-RN</td>
+                                        <td><input type="text" class="observation-input"></td>
+                                    </tr>
+                                    <!-- Mais jogos seriam adicionados aqui -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <h4 class="font-bold text-lg mb-2">Classificação</h4>
+                        <div class="overflow-x-auto">
+                            <table class="table-fixture">
+                                <thead>
+                                    <tr>
+                                        <th>Pos.</th>
+                                        <th>Equipe</th>
+                                        <th>P</th>
+                                        <th>J</th>
+                                        <th>V</th>
+                                        <th>E</th>
+                                        <th>D</th>
+                                        <th>GP</th>
+                                        <th>GC</th>
+                                        <th>SG</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>1</td>
+                                        <td class="text-left"><div class="team-logo">N</div>NATAL-RN</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                    </tr>
+                                    <tr>
+                                        <td>2</td>
+                                        <td class="text-left"><div class="team-logo">E</div>EDUARDO COELHO-PE</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                    </tr>
+                                    <tr>
+                                        <td>3</td>
+                                        <td class="text-left"><div class="team-logo">H</div>HCK-CE</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                    </tr>
+                                    <tr>
+                                        <td>4</td>
+                                        <td class="text-left"><div class="team-logo">M</div>MIRAIMA-CE</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                    </tr>
+                                    <tr>
+                                        <td>5</td>
+                                        <td class="text-left"><div class="team-logo">S</div>SALGUEIRO-PE</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h4 class="font-bold text-lg mb-2">Artilheiros</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <table class="table-fixture">
+                                    <thead>
+                                        <tr>
+                                            <th>Pos.</th>
+                                            <th>Jogador</th>
+                                            <th>Equipe</th>
+                                            <th>Gols</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>1</td>
+                                            <td><input type="text" class="observation-input" placeholder="Nome do jogador"></td>
+                                            <td>
+                                                <select class="observation-input">
+                                                    <option>NATAL-RN</option>
+                                                    <option>EDUARDO COELHO-PE</option>
+                                                    <option>HCK-CE</option>
+                                                    <option>MIRAIMA-CE</option>
+                                                    <option>SALGUEIRO-PE</option>
+                                                </select>
+                                            </td>
+                                            <td><input type="number" class="score-input" min="0"></td>
+                                        </tr>
+                                        <tr>
+                                            <td>2</td>
+                                            <td><input type="text" class="observation-input" placeholder="Nome do jogador"></td>
+                                            <td>
+                                                <select class="observation-input">
+                                                    <option>NATAL-RN</option>
+                                                    <option>EDUARDO COELHO-PE</option>
+                                                    <option>HCK-CE</option>
+                                                    <option>MIRAIMA-CE</option>
+                                                    <option>SALGUEIRO-PE</option>
+                                                </select>
+                                            </td>
+                                            <td><input type="number" class="score-input" min="0"></td>
+                                        </tr>
+                                        <!-- Mais linhas podem ser adicionadas aqui -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                                <h5 class="font-bold mb-2">Adicionar Artilheiro</h5>
+                                <div class="space-y-2">
+                                    <div>
+                                        <label class="block text-sm font-medium">Nome do Jogador</label>
+                                        <input type="text" class="observation-input" placeholder="Nome do jogador">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium">Equipe</label>
+                                        <select class="observation-input">
+                                            <option>NATAL-RN</option>
+                                            <option>EDUARDO COELHO-PE</option>
+                                            <option>HCK-CE</option>
+                                            <option>MIRAIMA-CE</option>
+                                            <option>SALGUEIRO-PE</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium">Gols</label>
+                                        <input type="number" class="observation-input" min="0">
+                                    </div>
+                                    <button class="bg-blue-600 text-white px-4 py-2 rounded w-full">Adicionar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Conteúdo da aba Chaves A e B (1) -->
+                <div id="tab2" class="tab-content p-4">
+                    <h3 class="text-xl font-bold mb-4 text-blue-900">Formato: Chaves A e B (Configuração 1)</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <h4 class="font-bold text-lg mb-2">Chave A</h4>
+                            <p class="text-sm text-gray-600 mb-2">Equipes: HANDEBOL JUAZEIRO/CE, PETROLINA/PE, CRAJUBAR/CE</p>
+                            
+                            <!-- Jogos da Chave A -->
+                            <div class="overflow-x-auto mb-4">
+                                <table class="table-fixture">
+                                    <thead>
+                                        <tr>
+                                            <th>Jogo</th>
+                                            <th>Equipe Casa</th>
+                                            <th>Placar</th>
+                                            <th>Equipe Visitante</th>
+                                            <th>Obs.</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>A1</td>
+                                            <td>HANDEBOL JUAZEIRO/CE</td>
+                                            <td>
+                                                <input type="number" class="score-input" min="0"> x 
+                                                <input type="number" class="score-input" min="0">
+                                            </td>
+                                            <td>PETROLINA/PE</td>
+                                            <td><input type="text" class="observation-input"></td>
+                                        </tr>
+                                        <tr>
+                                            <td>A2</td>
+                                            <td>PETROLINA/PE</td>
+                                            <td>
+                                                <input type="number" class="score-input" min="0"> x 
+                                                <input type="number" class="score-input" min="0">
+                                            </td>
+                                            <td>CRAJUBAR/CE</td>
+                                            <td><input type="text" class="observation-input"></td>
+                                        </tr>
+                                        <tr>
+                                            <td>A3</td>
+                                            <td>CRAJUBAR/CE</td>
+                                            <td>
+                                                <input type="number" class="score-input" min="0"> x 
+                                                <input type="number" class="score-input" min="0">
+                                            </td>
+                                            <td>HANDEBOL JUAZEIRO/CE</td>
+                                            <td><input type="text" class="observation-input"></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <!-- Classificação da Chave A -->
+                            <div class="overflow-x-auto">
+                                <table class="table-fixture">
+                                    <thead>
+                                        <tr>
+                                            <th>Pos.</th>
+                                            <th>Equipe</th>
+                                            <th>P</th>
+                                            <th>J</th>
+                                            <th>V</th>
+                                            <th>E</th>
+                                            <th>D</th>
+                                            <th>SG</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>1</td>
+                                            <td class="text-left"><div class="team-logo">H</div>HANDEBOL JUAZEIRO/CE</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2</td>
+                                            <td class="text-left"><div class="team-logo">P</div>PETROLINA/PE</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                        </tr>
+                                        <tr>
+                                            <td>3</td>
+                                            <td class="text-left"><div class="team-logo">C</div>CRAJUBAR/CE</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-bold text-lg mb-2">Chave B</h4>
+                            <p class="text-sm text-gray-600 mb-2">Equipes: EXU/PE, EDUARDO COELHO-PE, JUÁ ATLÉTICO HANDEBOL/CE</p>
+                            
+                            <!-- Jogos da Chave B -->
+                            <div class="overflow-x-auto mb-4">
+                                <table class="table-fixture">
+                                    <thead>
+                                        <tr>
+                                            <th>Jogo</th>
+                                            <th>Equipe Casa</th>
+                                            <th>Placar</th>
+                                            <th>Equipe Visitante</th>
+                                            <th>Obs.</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>B1</td>
+                                            <td>EXU/PE</td>
+                                            <td>
+                                                <input type="number" class="score-input" min="0"> x 
+                                                <input type="number" class="score-input" min="0">
+                                            </td>
+                                            <td>EDUARDO COELHO-PE</td>
+                                            <td><input type="text" class="observation-input"></td>
+                                        </tr>
+                                        <tr>
+                                            <td>B2</td>
+                                            <td>EDUARDO COELHO-PE</td>
+                                            <td>
+                                                <input type="number" class="score-input" min="0"> x 
+                                                <input type="number" class="score-input" min="0">
+                                            </td>
+                                            <td>JUÁ ATLÉTICO HANDEBOL/CE</td>
+                                            <td><input type="text" class="observation-input"></td>
+                                        </tr>
+                                        <tr>
+                                            <td>B3</td>
+                                            <td>JUÁ ATLÉTICO HANDEBOL/CE</td>
+                                            <td>
+                                                <input type="number" class="score-input" min="0"> x 
+                                                <input type="number" class="score-input" min="0">
+                                            </td>
+                                            <td>EXU/PE</td>
+                                            <td><input type="text" class="observation-input"></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <!-- Classificação da Chave B -->
+                            <div class="overflow-x-auto">
+                                <table class="table-fixture">
+                                    <thead>
+                                        <tr>
+                                            <th>Pos.</th>
+                                            <th>Equipe</th>
+                                            <th>P</th>
+                                            <th>J</th>
+                                            <th>V</th>
+                                            <th>E</th>
+                                            <th>D</th>
+                                            <th>SG</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>1</td>
+                                            <td class="text-left"><div class="team-logo">E</div>EXU/PE</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2</td>
+                                            <td class="text-left"><div class="team-logo">E</div>EDUARDO COELHO-PE</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                        </tr>
+                                        <tr>
+                                            <td>3</td>
+                                            <td class="text-left"><div class="team-logo">J</div>JUÁ ATLÉTICO HANDEBOL/CE</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Fase Final -->
+                    <div class="mb-6">
+                        <h4 class="font-bold text-lg mb-2">Fase Final</h4>
+                        
+                        <!-- Semifinais -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                                <h5 class="font-bold mb-2">Semifinal 1</h5>
+                                <p class="text-sm text-gray-600 mb-2">1º Chave A x 2º Chave B</p>
+                                <div class="flex items-center justify-center space-x-2 mb-2">
+                                    <span class="font-medium">Equipe 1</span>
+                                    <input type="number" class="score-input" min="0"> x 
+                                    <input type="number" class="score-input" min="0">
+                                    <span class="font-medium">Equipe 2</span>
+                                </div>
+                                <div class="text-sm text-center">
+                                    <div>
+                                        <label>Prorrogação:</label>
+                                        <input type="number" class="score-input" min="0"> x 
+                                        <input type="number" class="score-input" min="0">
+                                    </div>
+                                    <div>
+                                        <label>Tiros de 7 metros:</label>
+                                        <input type="number" class="score-input" min="0"> x 
+                                        <input type="number" class="score-input" min="0">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                                <h5 class="font-bold mb-2">Semifinal 2</h5>
+                                <p class="text-sm text-gray-600 mb-2">1º Chave B x 2º Chave A</p>
+                                <div class="flex items-center justify-center space-x-2 mb-2">
+                                    <span class="font-medium">Equipe 1</span>
+                                    <input type="number" class="score-input" min="0"> x 
+                                    <input type="number" class="score-input" min="0">
+                                    <span class="font-medium">Equipe 2</span>
+                                </div>
+                                <div class="text-sm text-center">
+                                    <div>
+                                        <label>Prorrogação:</label>
+                                        <input type="number" class="score-input" min="0"> x 
+                                        <input type="number" class="score-input" min="0">
+                                    </div>
+                                    <div>
+                                        <label>Tiros de 7 metros:</label>
+                                        <input type="number" class="score-input" min="0"> x 
+                                        <input type="number" class="score-input" min="0">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Final -->
+                        <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+                            <h5 class="font-bold mb-2 text-center">Final</h5>
+                            <div class="flex items-center justify-center space-x-2 mb-2">
+                                <span class="font-medium">Vencedor SF1</span>
+                                <input type="number" class="score-input" min="0"> x 
+                                <input type="number" class="score-input" min="0">
+                                <span class="font-medium">Vencedor SF2</span>
+                            </div>
+                            <div class="text-sm text-center">
+                                <div>
+                                    <label>Prorrogação:</label>
+                                    <input type="number" class="score-input" min="0"> x 
+                                    <input type="number" class="score-input" min="0">
+                                </div>
+                                <div>
+                                    <label>Tiros de 7 metros:</label>
+                                    <input type="number" class="score-input" min="0"> x 
+                                    <input type="number" class="score-input" min="0">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Artilheiros -->
+                    <div>
+                        <h4 class="font-bold text-lg mb-2">Artilheiros</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <table class="table-fixture">
+                                    <thead>
+                                        <tr>
+                                            <th>Pos.</th>
+                                            <th>Jogador</th>
+                                            <th>Equipe</th>
+                                            <th>Gols</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>1</td>
+                                            <td><input type="text" class="observation-input" placeholder="Nome do jogador"></td>
+                                            <td>
+                                                <select class="observation-input">
+                                                    <option>HANDEBOL JUAZEIRO/CE</option>
+                                                    <option>PETROLINA/PE</option>
+                                                    <option>CRAJUBAR/CE</option>
+                                                    <option>EXU/PE</option>
+                                                    <option>EDUARDO COELHO-PE</option>
+                                                    <option>JUÁ ATLÉTICO HANDEBOL/CE</option>
+                                                </select>
+                                            </td>
+                                            <td><input type="number" class="score-input" min="0"></td>
+                                        </tr>
+                                        <tr>
+                                            <td>2</td>
+                                            <td><input type="text" class="observation-input" placeholder="Nome do jogador"></td>
+                                            <td>
+                                                <select class="observation-input">
+                                                    <option>HANDEBOL JUAZEIRO/CE</option>
+                                                    <option>PETROLINA/PE</option>
+                                                    <option>CRAJUBAR/CE</option>
+                                                    <option>EXU/PE</option>
+                                                    <option>EDUARDO COELHO-PE</option>
+                                                    <option>JUÁ ATLÉTICO HANDEBOL/CE</option>
+                                                </select>
+                                            </td>
+                                            <td><input type="number" class="score-input" min="0"></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                                <h5 class="font-bold mb-2">Adicionar Artilheiro</h5>
+                                <div class="space-y-2">
+                                    <div>
+                                        <label class="block text-sm font-medium">Nome do Jogador</label>
+                                        <input type="text" class="observation-input" placeholder="Nome do jogador">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium">Equipe</label>
+                                        <select class="observation-input">
+                                            <option>HANDEBOL JUAZEIRO/CE</option>
+                                            <option>PETROLINA/PE</option>
+                                            <option>CRAJUBAR/CE</option>
+                                            <option>EXU/PE</option>
+                                            <option>EDUARDO COELHO-PE</option>
+                                            <option>JUÁ ATLÉTICO HANDEBOL/CE</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium">Gols</label>
+                                        <input type="number" class="observation-input" min="0">
+                                    </div>
+                                    <button class="bg-blue-600 text-white px-4 py-2 rounded w-full">Adicionar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Conteúdo da aba Chaves A e B (2) -->
+                <div id="tab3" class="tab-content p-4">
+                    <h3 class="text-xl font-bold mb-4 text-blue-900">Formato: Chaves A e B (Configuração 2)</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <h4 class="font-bold text-lg mb-2">Chave A</h4>
+                            <p class="text-sm text-gray-600 mb-2">Equipes: MIRAIMA/CE, SALGUEIRO/PE, EQUIPE 5-BARBALHA/CE</p>
+                            
+                            <!-- Jogos da Chave A -->
+                            <div class="overflow-x-auto mb-4">
+                                <table class="table-fixture">
+                                    <thead>
+                                        <tr>
+                                            <th>Jogo</th>
+                                            <th>Equipe Casa</th>
+                                            <th>Placar</th>
+                                            <th>Equipe Visitante</th>
+                                            <th>Obs.</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>A1</td>
+                                            <td>MIRAIMA/CE</td>
+                                            <td>
+                                                <input type="number" class="score-input" min="0"> x 
+                                                <input type="number" class="score-input" min="0">
+                                            </td>
+                                            <td>SALGUEIRO/PE</td>
+                                            <td><input type="text" class="observation-input"></td>
+                                        </tr>
+                                        <tr>
+                                            <td>A2</td>
+                                            <td>SALGUEIRO/PE</td>
+                                            <td>
+                                                <input type="number" class="score-input" min="0"> x 
+                                                <input type="number" class="score-input" min="0">
+                                            </td>
+                                            <td>EQUIPE 5-BARBALHA/CE</td>
+                                            <td><input type="text" class="observation-input"></td>
+                                        </tr>
+                                        <tr>
+                                            <td>A3</td>
+                                            <td>EQUIPE 5-BARBALHA/CE</td>
+                                            <td>
+                                                <input type="number" class="score-input" min="0"> x 
+                                                <input type="number" class="score-input" min="0">
+                                            </td>
+                                            <td>MIRAIMA/CE</td>
+                                            <td><input type="text" class="observation-input"></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <!-- Classificação da Chave A -->
+                            <div class="overflow-x-auto">
+                                <table class="table-fixture">
+                                    <thead>
+                                        <tr>
+                                            <th>Pos.</th>
+                                            <th>Equipe</th>
+                                            <th>P</th>
+                                            <th>J</th>
+                                            <th>V</th>
+                                            <th>E</th>
+                                            <th>D</th>
+                                            <th>SG</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>1</td>
+                                            <td class="text-left"><div class="team-logo">M</div>MIRAIMA/CE</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2</td>
+                                            <td class="text-left"><div class="team-logo">S</div>SALGUEIRO/PE</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                        </tr>
+                                        <tr>
+                                            <td>3</td>
+                                            <td class="text-left"><div class="team-logo">E</div>EQUIPE 5-BARBALHA/CE</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-bold text-lg mb-2">Chave B</h4>
+                            <p class="text-sm text-gray-600 mb-2">Equipes: HANDEBOL JUAZEIRO/CE, HCK/CE, EDUARDO COELHO/PE</p>
+                            
+                            <!-- Jogos da Chave B -->
+                            <div class="overflow-x-auto mb-4">
+                                <table class="table-fixture">
+                                    <thead>
+                                        <tr>
+                                            <th>Jogo</th>
+                                            <th>Equipe Casa</th>
+                                            <th>Placar</th>
+                                            <th>Equipe Visitante</th>
+                                            <th>Obs.</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>B1</td>
+                                            <td>HANDEBOL JUAZEIRO/CE</td>
+                                            <td>
+                                                <input type="number" class="score-input" min="0"> x 
+                                                <input type="number" class="score-input" min="0">
+                                            </td>
+                                            <td>HCK/CE</td>
+                                            <td><input type="text" class="observation-input"></td>
+                                        </tr>
+                                        <tr>
+                                            <td>B2</td>
+                                            <td>HCK/CE</td>
+                                            <td>
+                                                <input type="number" class="score-input" min="0"> x 
+                                                <input type="number" class="score-input" min="0">
+                                            </td>
+                                            <td>EDUARDO COELHO/PE</td>
+                                            <td><input type="text" class="observation-input"></td>
+                                        </tr>
+                                        <tr>
+                                            <td>B3</td>
+                                            <td>EDUARDO COELHO/PE</td>
+                                            <td>
+                                                <input type="number" class="score-input" min="0"> x 
+                                                <input type="number" class="score-input" min="0">
+                                            </td>
+                                            <td>HANDEBOL JUAZEIRO/CE</td>
+                                            <td><input type="text" class="observation-input"></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <!-- Classificação da Chave B -->
+                            <div class="overflow-x-auto">
+                                <table class="table-fixture">
+                                    <thead>
+                                        <tr>
+                                            <th>Pos.</th>
+                                            <th>Equipe</th>
+                                            <th>P</th>
+                                            <th>J</th>
+                                            <th>V</th>
+                                            <th>E</th>
+                                            <th>D</th>
+                                            <th>SG</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>1</td>
+                                            <td class="text-left"><div class="team-logo">H</div>HANDEBOL JUAZEIRO/CE</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2</td>
+                                            <td class="text-left"><div class="team-logo">H</div>HCK/CE</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                        </tr>
+                                        <tr>
+                                            <td>3</td>
+                                            <td class="text-left"><div class="team-logo">E</div>EDUARDO COELHO/PE</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Fase Final -->
+                    <div class="mb-6">
+                        <h4 class="font-bold text-lg mb-2">Fase Final</h4>
+                        
+                        <!-- Semifinais -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                                <h5 class="font-bold mb-2">Semifinal 1</h5>
+                                <p class="text-sm text-gray-600 mb-2">1º Chave A x 2º Chave B</p>
+                                <div class="flex items-center justify-center space-x-2 mb-2">
+                                    <span class="font-medium">Equipe 1</span>
+                                    <input type="number" class="score-input" min="0"> x 
+                                    <input type="number" class="score-input" min="0">
+                                    <span class="font-medium">Equipe 2</span>
+                                </div>
+                                <div class="text-sm text-center">
+                                    <div>
+                                        <label>Prorrogação:</label>
+                                        <input type="number" class="score-input" min="0"> x 
+                                        <input type="number" class="score-input" min="0">
+                                    </div>
+                                    <div>
+                                        <label>Tiros de 7 metros:</label>
+                                        <input type="number" class="score-input" min="0"> x 
+                                        <input type="number" class="score-input" min="0">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                                <h5 class="font-bold mb-2">Semifinal 2</h5>
+                                <p class="text-sm text-gray-600 mb-2">1º Chave B x 2º Chave A</p>
+                                <div class="flex items-center justify-center space-x-2 mb-2">
+                                    <span class="font-medium">Equipe 1</span>
+                                    <input type="number" class="score-input" min="0"> x 
+                                    <input type="number" class="score-input" min="0">
+                                    <span class="font-medium">Equipe 2</span>
+                                </div>
+                                <div class="text-sm text-center">
+                                    <div>
+                                        <label>Prorrogação:</label>
+                                        <input type="number" class="score-input" min="0"> x 
+                                        <input type="number" class="score-input" min="0">
+                                    </div>
+                                    <div>
+                                        <label>Tiros de 7 metros:</label>
+                                        <input type="number" class="score-input" min="0"> x 
+                                        <input type="number" class="score-input" min="0">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Final -->
+                        <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+                            <h5 class="font-bold mb-2 text-center">Final</h5>
+                            <div class="flex items-center justify-center space-x-2 mb-2">
+                                <span class="font-medium">Vencedor SF1</span>
+                                <input type="number" class="score-input" min="0"> x 
+                                <input type="number" class="score-input" min="0">
+                                <span class="font-medium">Vencedor SF2</span>
+                            </div>
+                            <div class="text-sm text-center">
+                                <div>
+                                    <label>Prorrogação:</label>
+                                    <input type="number" class="score-input" min="0"> x 
+                                    <input type="number" class="score-input" min="0">
+                                </div>
+                                <div>
+                                    <label>Tiros de 7 metros:</label>
+                                    <input type="number" class="score-input" min="0"> x 
+                                    <input type="number" class="score-input" min="0">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Artilheiros -->
+                    <div>
+                        <h4 class="font-bold text-lg mb-2">Artilheiros</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <table class="table-fixture">
+                                    <thead>
+                                        <tr>
+                                            <th>Pos.</th>
+                                            <th>Jogador</th>
+                                            <th>Equipe</th>
+                                            <th>Gols</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>1</td>
+                                            <td><input type="text" class="observation-input" placeholder="Nome do jogador"></td>
+                                            <td>
+                                                <select class="observation-input">
+                                                    <option>MIRAIMA/CE</option>
+                                                    <option>SALGUEIRO/PE</option>
+                                                    <option>EQUIPE 5-BARBALHA/CE</option>
+                                                    <option>HANDEBOL JUAZEIRO/CE</option>
+                                                    <option>HCK/CE</option>
+                                                    <option>EDUARDO COELHO/PE</option>
+                                                </select>
+                                            </td>
+                                            <td><input type="number" class="score-input" min="0"></td>
+                                        </tr>
+                                        <tr>
+                                            <td>2</td>
+                                            <td><input type="text" class="observation-input" placeholder="Nome do jogador"></td>
+                                            <td>
+                                                <select class="observation-input">
+                                                    <option>MIRAIMA/CE</option>
+                                                    <option>SALGUEIRO/PE</option>
+                                                    <option>EQUIPE 5-BARBALHA/CE</option>
+                                                    <option>HANDEBOL JUAZEIRO/CE</option>
+                                                    <option>HCK/CE</option>
+                                                    <option>EDUARDO COELHO/PE</option>
+                                                </select>
+                                            </td>
+                                            <td><input type="number" class="score-input" min="0"></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                                <h5 class="font-bold mb-2">Adicionar Artilheiro</h5>
+                                <div class="space-y-2">
+                                    <div>
+                                        <label class="block text-sm font-medium">Nome do Jogador</label>
+                                        <input type="text" class="observation-input" placeholder="Nome do jogador">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium">Equipe</label>
+                                        <select class="observation-input">
+                                            <option>MIRAIMA/CE</option>
+                                            <option>SALGUEIRO/PE</option>
+                                            <option>EQUIPE 5-BARBALHA/CE</option>
+                                            <option>HANDEBOL JUAZEIRO/CE</option>
+                                            <option>HCK/CE</option>
+                                            <option>EDUARDO COELHO/PE</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium">Gols</label>
+                                        <input type="number" class="observation-input" min="0">
+                                    </div>
+                                    <button class="bg-blue-600 text-white px-4 py-2 rounded w-full">Adicionar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-4 flex justify-end">
+                <button class="bg-blue-600 text-white px-6 py-2 rounded font-medium hover:bg-blue-700">
+                    <i class="fas fa-save mr-2"></i>Salvar Alterações
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Área Pública -->
+    <div id="publicView" class="view-content container mx-auto p-6">
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-2xl font-bold text-green-700 mb-4">Campeonato de Handebol - Resultados</h2>
+            <p class="mb-6 text-gray-700">Bem-vindo à área pública do campeonato de handebol. Aqui você pode acompanhar todos os resultados e classificações.</p>
+            
+            <!-- Abas para visualização pública -->
+            <div class="border rounded-lg overflow-hidden">
+                <div class="bg-gray-100 flex border-b">
+                    <button class="public-tab-button py-2 px-4 font-medium focus:outline-none bg-white border-r" data-tab="public-tab1">Todos Contra Todos</button>
+                    <button class="public-tab-button py-2 px-4 font-medium focus:outline-none bg-gray-100 border-r" data-tab="public-tab2">Chaves A e B (1)</button>
+                    <button class="public-tab-button py-2 px-4 font-medium focus:outline-none bg-gray-100" data-tab="public-tab3">Chaves A e B (2)</button>
+                </div>
+                
+                <!-- Conteúdo da aba Todos Contra Todos -->
+                <div id="public-tab1" class="tab-content active p-4">
+                    <h3 class="text-xl font-bold mb-4 text-green-700">Formato: Todos Contra Todos</h3>
+                    
+                    <div class="mb-6">
+                        <h4 class="font-bold text-lg mb-2">Classificação Atual</h4>
+                        <div class="overflow-x-auto">
+                            <table class="table-fixture">
+                                <thead>
+                                    <tr>
+                                        <th>Pos.</th>
+                                        <th>Equipe</th>
+                                        <th>P</th>
+                                        <th>J</th>
+                                        <th>V</th>
+                                        <th>E</th>
+                                        <th>D</th>
+                                        <th>GP</th>
+                                        <th>GC</th>
+                                        <th>SG</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>1</td>
+                                        <td class="text-left"><div class="team-logo">N</div>NATAL-RN</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                    </tr>
+                                    <tr>
+                                        <td>2</td>
+                                        <td class="text-left"><div class="team-logo">E</div>EDUARDO COELHO-PE</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                    </tr>
+                                    <tr>
+                                        <td>3</td>
+                                        <td class="text-left"><div class="team-logo">H</div>HCK-CE</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                    </tr>
+                                    <tr>
+                                        <td>4</td>
+                                        <td class="text-left"><div class="team-logo">M</div>MIRAIMA-CE</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                    </tr>
+                                    <tr>
+                                        <td>5</td>
+                                        <td class="text-left"><div class="team-logo">S</div>SALGUEIRO-PE</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <h4 class="font-bold text-lg mb-2">Jogos e Resultados</h4>
+                        <div class="overflow-x-auto">
+                            <table class="table-fixture">
+                                <thead>
+                                    <tr>
+                                        <th>Jogo</th>
+                                        <th>Equipe Casa</th>
+                                        <th>Placar</th>
+                                        <th>Equipe Visitante</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>1</td>
+                                        <td>NATAL-RN</td>
+                                        <td>- x -</td>
+                                        <td>EDUARDO COELHO-PE</td>
+                                    </tr>
+                                    <tr>
+                                        <td>2</td>
+                                        <td>HCK-CE</td>
+                                        <td>- x -</td>
+                                        <td>MIRAIMA-CE</td>
+                                    </tr>
+                                    <tr>
+                                        <td>3</td>
+                                        <td>SALGUEIRO-PE</td>
+                                        <td>- x -</td>
+                                        <td>NATAL-RN</td>
+                                    </tr>
+                                    <!-- Mais jogos seriam adicionados aqui -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h4 class="font-bold text-lg mb-2">Artilheiros</h4>
+                        <div class="overflow-x-auto">
+                            <table class="table-fixture">
+                                <thead>
+                                    <tr>
+                                        <th>Pos.</th>
+                                        <th>Jogador</th>
+                                        <th>Equipe</th>
+                                        <th>Gols</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td colspan="4" class="text-center py-4 text-gray-500">Nenhum artilheiro registrado</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Conteúdo da aba Chaves A e B (1) -->
+                <div id="public-tab2" class="tab-content p-4">
+                    <h3 class="text-xl font-bold mb-4 text-green-700">Formato: Chaves A e B (Configuração 1)</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <h4 class="font-bold text-lg mb-2">Chave A</h4>
+                            <p class="text-sm text-gray-600 mb-2">Equipes: HANDEBOL JUAZEIRO/CE, PETROLINA/PE, CRAJUBAR/CE</p>
+                            
+                            <!-- Classificação da Chave A -->
+                            <div class="overflow-x-auto mb-4">
+                                <table class="table-fixture">
+                                    <thead>
+                                        <tr>
+                                            <th>Pos.</th>
+                                            <th>Equipe</th>
+                                            <th>P</th>
+                                            <th>J</th>
+                                            <th>V</th>
+                                            <th>E</th>
+                                            <th>D</th>
+                                            <th>SG</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>1</td>
+                                            <td class="text-left"><div class="team-logo">H</div>HANDEBOL JUAZEIRO/CE</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2</td>
+                                            <td class="text-left"><div class="team-logo">P</div>PETROLINA/PE</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                        </tr>
+                                        <tr>
+                                            <td>3</td>
+                                            <td class="text-left"><div class="team-logo">C</div>CRAJUBAR/CE</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <!-- Jogos da Chave A -->
+                            <div class="overflow-x-auto">
+                                <table class="table-fixture">
+                                    <thead>
+                                        <tr>
+                                            <th>Jogo</th>
+                                            <th>Equipe Casa</th>
+                                            <th>Placar</th>
+                                            <th>Equipe Visitante</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>A1</td>
+                                            <td>HANDEBOL JUAZEIRO/CE</td>
+                                            <td>- x -</td>
+                                            <td>PETROLINA/PE</td>
+                                        </tr>
+                                        <tr>
+                                            <td>A2</td>
+                                            <td>PETROLINA/PE</td>
+                                            <td>- x -</td>
+                                            <td>CRAJUBAR/CE</td>
+                                        </tr>
+                                        <tr>
+                                            <td>A3</td>
+                                            <td>CRAJUBAR/CE</td>
+                                            <td>- x -</td>
+                                            <td>HANDEBOL JUAZEIRO/CE</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-bold text-lg mb-2">Chave B</h4>
+                            <p class="text-sm text-gray-600 mb-2">Equipes: EXU/PE, EDUARDO COELHO-PE, JUÁ ATLÉTICO HANDEBOL/CE</p>
+                            
+                            <!-- Classificação da Chave B -->
+                            <div class="overflow-x-auto mb-4">
+                                <table class="table-fixture">
+                                    <thead>
+                                        <tr>
+                                            <th>Pos.</th>
+                                            <th>Equipe</th>
+                                            <th>P</th>
+                                            <th>J</th>
+                                            <th>V</th>
+                                            <th>E</th>
+                                            <th>D</th>
+                                            <th>SG</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>1</td>
+                                            <td class="text-left"><div class="team-logo">E</div>EXU/PE</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2</td>
+                                            <td class="text-left"><div class="team-logo">E</div>EDUARDO COELHO-PE</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                        </tr>
+                                        <tr>
+                                            <td>3</td>
+                                            <td class="text-left"><div class="team-logo">J</div>JUÁ ATLÉTICO HANDEBOL/CE</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <!-- Jogos da Chave B -->
+                            <div class="overflow-x-auto">
+                                <table class="table-fixture">
+                                    <thead>
+                                        <tr>
+                                            <th>Jogo</th>
+                                            <th>Equipe Casa</th>
+                                            <th>Placar</th>
+                                            <th>Equipe Visitante</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>B1</td>
+                                            <td>EXU/PE</td>
+                                            <td>- x -</td>
+                                            <td>EDUARDO COELHO-PE</td>
+                                        </tr>
+                                        <tr>
+                                            <td>B2</td>
+                                            <td>EDUARDO COELHO-PE</td>
+                                            <td>- x -</td>
+                                            <td>JUÁ ATLÉTICO HANDEBOL/CE</td>
+                                        </tr>
+                                        <tr>
+                                            <td>B3</td>
+                                            <td>JUÁ ATLÉTICO HANDEBOL/CE</td>
+                                            <td>- x -</td>
+                                            <td>EXU/PE</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Fase Final -->
+                    <div class="mb-6">
+                        <h4 class="font-bold text-lg mb-2">Fase Final</h4>
+                        
+                        <!-- Semifinais e Finais -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                                <h5 class="font-bold mb-2">Semifinal 1</h5>
+                                <p class="text-sm text-gray-600 mb-1">1º Chave A x 2º Chave B</p>
+                                <p class="text-center font-medium">Aguardando definição</p>
+                            </div>
+                            
+                            <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                                <h5 class="font-bold mb-2">Semifinal 2</h5>
+                                <p class="text-sm text-gray-600 mb-1">1º Chave B x 2º Chave A</p>
+                                <p class="text-center font-medium">Aguardando definição</p>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+                            <h5 class="font-bold mb-2 text-center">Final</h5>
+                            <p class="text-center font-medium">Aguardando definição</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Artilheiros -->
+                    <div>
+                        <h4 class="font-bold text-lg mb-2">Artilheiros</h4>
+                        <div class="overflow-x-auto">
+                            <table class="table-fixture">
+                                <thead>
+                                    <tr>
+                                        <th>Pos.</th>
+                                        <th>Jogador</th>
+                                        <th>Equipe</th>
+                                        <th>Gols</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td colspan="4" class="text-center py-4 text-gray-500">Nenhum artilheiro registrado</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Conteúdo da aba Chaves A e B (2) -->
+                <div id="public-tab3" class="tab-content p-4">
+                    <h3 class="text-xl font-bold mb-4 text-green-700">Formato: Chaves A e B (Configuração 2)</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <h4 class="font-bold text-lg mb-2">Chave A</h4>
+                            <p class="text-sm text-gray-600 mb-2">Equipes: MIRAIMA/CE, SALGUEIRO/PE, EQUIPE 5-BARBALHA/CE</p>
+                            
+                            <!-- Classificação da Chave A -->
+                            <div class="overflow-x-auto mb-4">
+                                <table class="table-fixture">
+                                    <thead>
+                                        <tr>
+                                            <th>Pos.</th>
+                                            <th>Equipe</th>
+                                            <th>P</th>
+                                            <th>J</th>
+                                            <th>V</th>
+                                            <th>E</th>
+                                            <th>D</th>
+                                            <th>SG</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>1</td>
+                                            <td class="text-left"><div class="team-logo">M</div>MIRAIMA/CE</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2</td>
+                                            <td class="text-left"><div class="team-logo">S</div>SALGUEIRO/PE</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                        </tr>
+                                        <tr>
+                                            <td>3</td>
+                                            <td class="text-left"><div class="team-logo">E</div>EQUIPE 5-BARBALHA/CE</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <!-- Jogos da Chave A -->
+                            <div class="overflow-x-auto">
+                                <table class="table-fixture">
+                                    <thead>
+                                        <tr>
+                                            <th>Jogo</th>
+                                            <th>Equipe Casa</th>
+                                            <th>Placar</th>
+                                            <th>Equipe Visitante</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>A1</td>
+                                            <td>MIRAIMA/CE</td>
+                                            <td>- x -</td>
+                                            <td>SALGUEIRO/PE</td>
+                                        </tr>
+                                        <tr>
+                                            <td>A2</td>
+                                            <td>SALGUEIRO/PE</td>
+                                            <td>- x -</td>
+                                            <td>EQUIPE 5-BARBALHA/CE</td>
+                                        </tr>
+                                        <tr>
+                                            <td>A3</td>
+                                            <td>EQUIPE 5-BARBALHA/CE</td>
+                                            <td>- x -</td>
+                                            <td>MIRAIMA/CE</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-bold text-lg mb-2">Chave B</h4>
+                            <p class="text-sm text-gray-600 mb-2">Equipes: HANDEBOL JUAZEIRO/CE, HCK/CE, EDUARDO COELHO/PE</p>
+                            
+                            <!-- Classificação da Chave B -->
+                            <div class="overflow-x-auto mb-4">
+                                <table class="table-fixture">
+                                    <thead>
+                                        <tr>
+                                            <th>Pos.</th>
+                                            <th>Equipe</th>
+                                            <th>P</th>
+                                            <th>J</th>
+                                            <th>V</th>
+                                            <th>E</th>
+                                            <th>D</th>
+                                            <th>SG</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>1</td>
+                                            <td class="text-left"><div class="team-logo">H</div>HANDEBOL JUAZEIRO/CE</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2</td>
+                                            <td class="text-left"><div class="team-logo">H</div>HCK/CE</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                        </tr>
+                                        <tr>
+                                            <td>3</td>
+                                            <td class="text-left"><div class="team-logo">E</div>EDUARDO COELHO/PE</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <!-- Jogos da Chave B -->
+                            <div class="overflow-x-auto">
+                                <table class="table-fixture">
+                                    <thead>
+                                        <tr>
+                                            <th>Jogo</th>
+                                            <th>Equipe Casa</th>
+                                            <th>Placar</th>
+                                            <th>Equipe Visitante</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>B1</td>
+                                            <td>HANDEBOL JUAZEIRO/CE</td>
+                                            <td>- x -</td>
+                                            <td>HCK/CE</td>
+                                        </tr>
+                                        <tr>
+                                            <td>B2</td>
+                                            <td>HCK/CE</td>
+                                            <td>- x -</td>
+                                            <td>EDUARDO COELHO/PE</td>
+                                        </tr>
+                                        <tr>
+                                            <td>B3</td>
+                                            <td>EDUARDO COELHO/PE</td>
+                                            <td>- x -</td>
+                                            <td>HANDEBOL JUAZEIRO/CE</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Fase Final -->
+                    <div class="mb-6">
+                        <h4 class="font-bold text-lg mb-2">Fase Final</h4>
+                        
+                        <!-- Semifinais e Finais -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                                <h5 class="font-bold mb-2">Semifinal 1</h5>
+                                <p class="text-sm text-gray-600 mb-1">1º Chave A x 2º Chave B</p>
+                                <p class="text-center font-medium">Aguardando definição</p>
+                            </div>
+                            
+                            <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                                <h5 class="font-bold mb-2">Semifinal 2</h5>
+                                <p class="text-sm text-gray-600 mb-1">1º Chave B x 2º Chave A</p>
+                                <p class="text-center font-medium">Aguardando definição</p>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+                            <h5 class="font-bold mb-2 text-center">Final</h5>
+                            <p class="text-center font-medium">Aguardando definição</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Artilheiros -->
+                    <div>
+                        <h4 class="font-bold text-lg mb-2">Artilheiros</h4>
+                        <div class="overflow-x-auto">
+                            <table class="table-fixture">
+                                <thead>
+                                    <tr>
+                                        <th>Pos.</th>
+                                        <th>Jogador</th>
+                                        <th>Equipe</th>
+                                        <th>Gols</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td colspan="4" class="text-center py-4 text-gray-500">Nenhum artilheiro registrado</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer class="bg-gray-800 text-white p-6">
+        <div class="container mx-auto">
+            <div class="flex flex-col md:flex-row justify-between">
+                <div class="mb-4 md:mb-0">
+                    <h3 class="text-xl font-bold mb-2">Campeonato de Handebol</h3>
+                    <p class="text-gray-400">Sistema de gerenciamento de competições</p>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-2">Contato</h4>
+                    <p class="text-gray-400">Email: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="6708150006090e1d060406082704060a170208090613080f0609030205080b4904080a">[email&#160;protected]</a></p>
+                    <p class="text-gray-400">Telefone: (00) 00000-0000</p>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-6 pt-6 text-center text-gray-400">
+                <p>&copy; 2023 Campeonato de Handebol. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+        // Alternar entre as abas
+        function setupTabs(tabButtonClass, tabContentId) {
+            const tabButtons = document.querySelectorAll('.' + tabButtonClass);
+            
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // Remover classe ativa de todos os botões
+                    tabButtons.forEach(btn => {
+                        btn.classList.remove('bg-white');
+                        btn.classList.add('bg-gray-100');
+                    });
+                    
+                    // Adicionar classe ativa ao botão clicado
+                    button.classList.add('bg-white');
+                    button.classList.remove('bg-gray-100');
+                    
+                    // Remover classe ativa de todas as abas
+                    const tabContents = document.querySelectorAll('.tab-content');
+                    tabContents.forEach(tab => {
+                        tab.classList.remove('active');
+                    });
+                    
+                    // Mostrar conteúdo da aba correspondente
+                    const tabId = button.getAttribute('data-tab');
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+        }
+        
+        // Alternar entre as visões (Admin/Público)
+        function setupViews() {
+            const adminViewBtn = document.getElementById('adminViewBtn');
+            const publicViewBtn = document.getElementById('publicViewBtn');
+            const adminView = document.getElementById('adminView');
+            const publicView = document.getElementById('publicView');
+            
+            adminViewBtn.addEventListener('click', () => {
+                adminViewBtn.classList.add('bg-blue-700');
+                adminViewBtn.classList.remove('bg-blue-600');
+                publicViewBtn.classList.add('bg-green-700');
+                publicViewBtn.classList.remove('bg-green-600');
+                
+                adminView.classList.add('active');
+                publicView.classList.remove('active');
+            });
+            
+            publicViewBtn.addEventListener('click', () => {
+                publicViewBtn.classList.add('bg-green-600');
+                publicViewBtn.classList.remove('bg-green-700');
+                adminViewBtn.classList.add('bg-blue-600');
+                adminViewBtn.classList.remove('bg-blue-700');
+                
+                publicView.classList.add('active');
+                adminView.classList.remove('active');
+            });
+        }
+        
+        // Executar após o carregamento do DOM
+        document.addEventListener('DOMContentLoaded', () => {
+            setupTabs('tab-button', 'tab');
+            setupTabs('public-tab-button', 'public-tab');
+            setupViews();
+        });
+    </script>
+</body>
+</html>
+    <script id="html_badge_script1">
+        window.__genspark_remove_badge_link = "https://www.genspark.ai/api/html_badge/" +
+            "remove_badge?token=To%2FBnjzloZ3UfQdcSaYfDk8a%2BDFjsQTMiWzVwbdc4NoUC1BMHx9UABxSzlPksrKRewKJecEDfsr%2FMYTb5WBDh2Svua4UILAmBoSwDi%2F2NswxsEaO3XBgwBRnzfdvR5Ks53X58KkoNwQ86t9E7zu0gaK0E3WSHrqgfuxNf4vqDyfFnIY6GZa%2FufViZlSrt7vVbRd23mCSEPHjXu7636IM5ifNUR3WwjRtCcFeEo1%2Bd6UQVF965t0WE0BAr53O5XfUX2cqiLXGQKpKJioNmCXIfwr0Ecad5RczW4zuGtGfn9uCJuP%2BZ%2Bqi64WsNlp1Nu2zIMj9Fy0qtsjONMBfxV%2Fe%2BSWrTD1DTT%2BUS5g2FvDaVj2sKwDD6nAuwXgNBpXZcMzN7M7dz6Sw27RjujGMNpgO2lvazqCsi1Iq%2FSj9gRbtgkC7vRtahRzHYr6nGPs%2FX6ZbnAsyZuTesnJ8yqM4iV%2F9ciFEYBNxx72evHU%2FEVX7bVG5kgSPDP6p7V2V4hudXLu5v8ARmBIiZc0LvFuQfJivwQ%3D%3D";
+        window.__genspark_locale = "pt-BR";
+        window.__genspark_token = "To/BnjzloZ3UfQdcSaYfDk8a+DFjsQTMiWzVwbdc4NoUC1BMHx9UABxSzlPksrKRewKJecEDfsr/MYTb5WBDh2Svua4UILAmBoSwDi/2NswxsEaO3XBgwBRnzfdvR5Ks53X58KkoNwQ86t9E7zu0gaK0E3WSHrqgfuxNf4vqDyfFnIY6GZa/ufViZlSrt7vVbRd23mCSEPHjXu7636IM5ifNUR3WwjRtCcFeEo1+d6UQVF965t0WE0BAr53O5XfUX2cqiLXGQKpKJioNmCXIfwr0Ecad5RczW4zuGtGfn9uCJuP+Z+qi64WsNlp1Nu2zIMj9Fy0qtsjONMBfxV/e+SWrTD1DTT+US5g2FvDaVj2sKwDD6nAuwXgNBpXZcMzN7M7dz6Sw27RjujGMNpgO2lvazqCsi1Iq/Sj9gRbtgkC7vRtahRzHYr6nGPs/X6ZbnAsyZuTesnJ8yqM4iV/9ciFEYBNxx72evHU/EVX7bVG5kgSPDP6p7V2V4hudXLu5v8ARmBIiZc0LvFuQfJivwQ==";
+    </script>
+    
+        <script id="html_badge_script2" src="https://www.genspark.ai/html_badge.js"></script>
+        
